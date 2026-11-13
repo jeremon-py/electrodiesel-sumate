@@ -1,0 +1,62 @@
+---
+import { WHY_POINTS, WHY_SLIDES } from '../data/why';
+import { asset } from '../lib/url';
+
+const icons: Record<string, string> = {
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  award: '<circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/>',
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
+};
+---
+<section class="container-x pb-24 md:pb-40" aria-labelledby="why-title">
+  <div class="grid overflow-hidden rounded-[18px] border border-[#B5B5B5] bg-soft md:grid-cols-[1fr_36.8%] md:rounded-3xl">
+    <div class="px-[22px] pt-8 pb-9 md:pt-14 md:pr-7 md:pb-12 md:pl-10 lg:pt-20 lg:pr-8 lg:pb-16 lg:pl-[70px]">
+      <h2 id="why-title" class="mb-7 text-[clamp(26px,2.7vw,32px)] font-semibold tracking-tight text-black md:mb-11">¿Por qué Electro Diesel?</h2>
+      <ul class="grid gap-6 md:gap-[30px] lg:gap-11">
+        {WHY_POINTS.map((p) => (
+          <li class="group grid grid-cols-[60px_1fr] items-center gap-4 md:grid-cols-[80px_1fr] md:gap-5">
+            <span class="grid size-[60px] -rotate-1 place-items-center rounded-[11px] bg-white text-brand shadow-[0_6px_16px_rgba(0,0,0,.05)] transition-transform group-even:rotate-[1.2deg] group-hover:scale-105 group-hover:rotate-0 md:size-20">
+              <svg class="size-7 md:size-[34px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={icons[p.icon]} />
+            </span>
+            <div>
+              <h3 class="mb-1 text-[17px] font-semibold text-ink md:mb-2 md:text-xl">{p.titulo}</h3>
+              <p class="max-w-[400px] text-sm leading-[1.55] text-[#5F5F5F] md:text-[15px]">{p.texto}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Visual en capas: fondo recortado en círculo + arco + persona recortada. Rota cada 3 s. -->
+    <div class="why-visual max-md:order-first" id="whySlider">
+      <div class="why-stage">
+        <div class="why-circle">
+          {WHY_SLIDES.map((s, k) => (
+            <img src={asset(s.fondo)} alt="" style={`object-position:${s.foco ?? '50% 50%'}`} class={k === 0 ? 'active' : ''}
+              loading={k === 0 ? 'eager' : 'lazy'} decoding="async" />
+          ))}
+        </div>
+        <div class="why-person">
+          {WHY_SLIDES.map((s, k) => (
+            <img src={asset(s.persona)} alt={s.alt} class={k === 0 ? 'active' : ''} loading={k === 0 ? 'eager' : 'lazy'} decoding="async" />
+          ))}
+        </div>
+      </div>
+      <svg class="why-arc" viewBox="0 0 440 583" aria-hidden="true"><path d="M440 .456V269.456C377.96 117.999 321.19 62.077 191 .456H440Z" fill="var(--color-arc)" /></svg>
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById('whySlider')!;
+  const layers = [root.querySelectorAll('.why-circle img'), root.querySelectorAll('.why-person img')];
+  const total = layers[0].length;
+  let i = 0;
+  if (total > 1) {
+    setInterval(() => {
+      const n = (i + 1) % total;
+      layers.forEach((l) => { l[i].classList.remove('active'); l[n].classList.add('active'); });
+      i = n;
+    }, 3000);
+  }
+</script>

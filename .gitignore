@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+
+# Prototipo HTML original (reemplazado por el proyecto Astro)
+/sumate-al-equipo.html
+/assets/
+
+.vercel
+.env*

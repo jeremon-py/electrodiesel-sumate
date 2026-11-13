@@ -1,0 +1,410 @@
+---
+import { AREAS_ABIERTAS, AREAS_ORDENADAS, CIUDADES } from '../data/vacantes';
+const TAG = 'Vacante abierta';
+const fileIcon = '<path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 7V3.5L18.5 9H13ZM8 13h8v1.6H8V13Zm0 3.4h8V18H8v-1.6Z"/>';
+---
+<section id="formulario" aria-labelledby="form-title"
+  class="container-x scroll-mt-30 rounded-t-[18px] border border-b-0 border-[#B5B5B5] bg-soft md:rounded-t-3xl">
+  <div id="applyForm" class="px-5 pt-9 pb-14 md:px-10 md:pt-14 md:pb-16 lg:px-[70px] lg:pt-20 lg:pb-24">
+    <h2 id="form-title" class="mb-3.5 text-[clamp(28px,3vw,34px)] font-bold tracking-tight text-black">Formulario de aplicación</h2>
+    <p data-lead class="mb-7 text-base text-[#111]">Nuestro equipo de Capital Humano te tendrá en cuenta para las vacantes.</p>
+
+    <div id="stepper" class="mb-9 border-y border-[#c9c9c9] py-6">
+    <ol class="stepper flex list-none">
+      <li class="active"><span class="n">1</span><span class="l">Área</span></li>
+      <li><span class="n">2</span><span class="l">Datos personales</span></li>
+      <li><span class="n">3</span><span class="l">Contacto</span></li>
+      <li><span class="n">4</span><span class="l">Tu perfil y CV</span></li>
+    </ol>
+    <!-- En celular solo se ven los círculos; el nombre del paso actual va acá -->
+    <p id="stepLabel" class="mt-3 text-sm font-bold text-ink md:hidden">Área</p>
+    </div>
+
+    <form id="form" novalidate>
+      <!-- Altura mínima igual para todos los pasos: el contenido queda arriba y los botones no saltan -->
+      <div class="md:min-h-[260px]">
+      <!-- Paso 1: área -->
+      <div class="step active" data-step="1">
+        <div class="grid gap-x-5 gap-y-[22px] md:grid-cols-2">
+          <div class="field md:col-span-2" id="areaField">
+            <label id="areaLbl">¿En qué área te gustaría trabajar? <span class="req">*</span></label>
+            <div class="relative" id="areaDD">
+              <button type="button" class="select dd-btn" id="areaBtn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="areaLbl">
+                <span class="dd-val is-empty">Seleccioná un área</span>
+              </button>
+              <ul class="dd-list" id="areaList" role="listbox" aria-labelledby="areaLbl" tabindex="-1" hidden>
+                {AREAS_ORDENADAS.map((a, k) => (
+                  <li role="option" id={`opt-${k}`} data-value={a} data-open={AREAS_ABIERTAS.has(a) ? '' : undefined} aria-selected="false">
+                    <span>{a}</span>{AREAS_ABIERTAS.has(a) && <span class="dd-tag">{TAG}</span>}
+                  </li>
+                ))}
+              </ul>
+              <input type="hidden" id="area" name="area" required />
+            </div>
+            <div class="err">Seleccioná un área.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: datos personales -->
+      <div class="step" data-step="2">
+        <div class="grid gap-x-5 gap-y-[22px] md:grid-cols-2">
+          <div class="field">
+            <label for="nombre">Nombre/s <span class="req">*</span></label>
+            <input class="input" id="nombre" name="nombre" placeholder="Ingresá tu nombre" required autocomplete="given-name" />
+            <div class="err">Ingresá tu nombre.</div>
+          </div>
+          <div class="field">
+            <label for="apellido">Apellido(s) <span class="req">*</span></label>
+            <input class="input" id="apellido" name="apellido" placeholder="Ingresá tu apellido" required autocomplete="family-name" />
+            <div class="err">Ingresá tu apellido.</div>
+          </div>
+          <div class="field">
+            <label for="nac">Fecha de nacimiento <span class="req">*</span></label>
+            <input class="input" type="date" id="nac" name="nacimiento" required />
+            <div class="err">Indicá tu fecha de nacimiento.</div>
+          </div>
+          <div class="field">
+            <label for="genero">Género</label>
+            <select class="select" id="genero" name="genero">
+              <option value="" selected disabled>Seleccioná</option>
+              <option>Femenino</option><option>Masculino</option><option>Otro</option><option>Prefiero no decir</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 3: contacto -->
+      <div class="step" data-step="3">
+        <div class="grid gap-x-5 gap-y-[22px] md:grid-cols-2">
+          <div class="field">
+            <label for="tel">Número de teléfono <span class="req">*</span></label>
+            <div class="phone">
+              <select class="select" aria-label="Código de país" name="pais"><option>+595</option><option>+54</option><option>+55</option></select>
+              <input class="input" type="tel" id="tel" name="telefono" placeholder="981 123 456" required inputmode="tel" autocomplete="tel-national" />
+            </div>
+            <div class="err">Ingresá un número de teléfono válido.</div>
+          </div>
+          <div class="field">
+            <label for="email">Correo electrónico <span class="req">*</span></label>
+            <input class="input" type="email" id="email" name="email" placeholder="nombre@correo.com" required autocomplete="email" />
+            <div class="err">Ingresá un correo válido.</div>
+          </div>
+          <div class="field">
+            <label for="ciudad">Ciudad de residencia <span class="req">*</span></label>
+            <select class="select" id="ciudad" name="ciudad" required>
+              <option value="" selected disabled>Seleccioná tu ciudad</option>
+              {CIUDADES.map((c) => <option>{c}</option>)}
+            </select>
+            <div class="err">Seleccioná tu ciudad.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 4: perfil (preguntas de a una) y CV -->
+      <div class="step" data-step="4">
+        <div class="grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border border-line bg-white md:grid-cols-[220px_minmax(0,1fr)]">
+          <!-- Stepper secundario: preguntas y CV -->
+          <ol class="substepper" id="substepper">
+            <li class="active"><button type="button" data-go="0"><span class="sn"></span><span class="sl">Pregunta 1</span></button></li>
+            <li><button type="button" data-go="1"><span class="sn"></span><span class="sl">Pregunta 2</span></button></li>
+            <li><button type="button" data-go="2"><span class="sn"></span><span class="sl">Pregunta 3</span></button></li>
+            <li><button type="button" data-go="3"><span class="sn"></span><span class="sl">Tu CV</span></button></li>
+          </ol>
+          <div class="p-5 md:p-8">
+            <div class="sub active" data-sub="0">
+      <fieldset class="q" data-name="experiencia">
+                  <legend>¿Tenés experiencia en el cargo postulado?</legend>
+                  <div class="grid gap-3">
+                    <label class="radio"><input type="radio" name="experiencia" value="si" />Sí</label>
+                    <label class="radio"><input type="radio" name="experiencia" value="no" />No</label>
+                  </div>
+                </fieldset>
+            </div>
+            <div class="sub" data-sub="1">
+      <fieldset class="q" data-name="publicado">
+                  <legend>¿Estás postulando a un cargo publicado?</legend>
+                  <div class="grid gap-3">
+                    <label class="radio"><input type="radio" name="publicado" value="si" />Sí, vi una publicación</label>
+                    <label class="radio"><input type="radio" name="publicado" value="no" />No, pero quiero trabajar con ustedes</label>
+                  </div>
+                </fieldset>
+            </div>
+            <div class="sub" data-sub="2">
+      <fieldset class="q" data-name="trabajando">
+                  <legend>¿Estás actualmente trabajando?</legend>
+                  <div class="grid gap-3">
+                    <label class="radio"><input type="radio" name="trabajando" value="si" />Sí</label>
+                    <label class="radio"><input type="radio" name="trabajando" value="no" />No</label>
+                    <label class="radio"><input type="radio" name="trabajando" value="primer" />Es mi primer trabajo</label>
+                  </div>
+                </fieldset>
+            </div>
+            <div class="sub" data-sub="3">
+      <div class="field" id="cvField">
+                <div class="upload flex flex-wrap items-center gap-[22px] rounded-[14px] border-[1.5px] border-dashed border-[#cfcfcf] bg-white p-[22px] transition-colors" id="drop">
+                  <label class="btn btn-outline mb-0! inline-flex! rounded-xl! px-[26px] py-4 text-[17px]! font-bold! text-brand!" for="cv">
+                    <svg width="20" height="20" viewBox="0 0 24 24" set:html={fileIcon} />Subir mi CV
+                  </label>
+                  <input class="sr-only" type="file" id="cv" name="cv" accept=".pdf,application/pdf" />
+                  <div class="min-w-[220px] flex-1 text-sm leading-normal">
+                    Adjuntá tu CV en PDF. Peso máximo: 5 MB. También podés arrastrarlo acá.
+                    <div class="mt-2 hidden items-center gap-2.5 font-semibold text-ink data-[show]:flex" id="fileInfo">
+                      <svg class="text-brand" width="18" height="18" viewBox="0 0 24 24" set:html={fileIcon} />
+                      <span id="fileName"></span>
+                      <button type="button" id="fileRemove" class="text-[13px] font-semibold text-brand">Quitar</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="err" id="cvErr">Adjuntá tu CV.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+      <div class="mt-8 flex items-center justify-end gap-3 md:mt-10 [&>.btn]:h-[50px] [&>.btn]:min-w-[124px]">
+        <button type="button" class="btn btn-ghost" id="back" hidden>Atrás</button>
+        <button type="button" class="btn btn-primary" id="nextStep">Siguiente</button>
+      </div>
+    </form>
+
+    <div id="success" role="status" hidden class="mx-auto max-w-[560px] pt-12 pb-6 text-center" style="animation: fade .4s ease">
+      <!-- Rayo: empieza punteado, se dibuja desde la punta de arriba y termina relleno en rojo -->
+      <div id="okBolt" class="ok-bolt relative mx-auto mb-6 grid size-24 place-items-center" aria-hidden="true">
+        <span class="ok-circle absolute inset-0 rounded-full"></span>
+        <svg class="relative" width="40" height="68" viewBox="640.5 239 37 63">
+          <path class="base" d="M669.828 242L643.541 274.636H657.682L649.253 298.178L674.847 267.177H660.705Z" />
+          <path class="draw" pathLength="1" d="M669.828 242L643.541 274.636H657.682L649.253 298.178L674.847 267.177H660.705Z" />
+          <!-- Brillo: una franja clara que recorre el rayo de abajo hacia arriba -->
+          <defs>
+            <clipPath id="okClip"><path d="M669.828 242L643.541 274.636H657.682L649.253 298.178L674.847 267.177H660.705Z" /></clipPath>
+            <linearGradient id="okShineGrad" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0" stop-color="#fff" stop-opacity="0" />
+              <stop offset=".5" stop-color="#fff" stop-opacity=".75" />
+              <stop offset="1" stop-color="#fff" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <g clip-path="url(#okClip)">
+            <rect class="shine" x="638" y="300" width="42" height="20" fill="url(#okShineGrad)" />
+          </g>
+        </svg>
+      </div>
+      <h3 class="mb-2.5 text-[26px] font-bold text-ink">¡Gracias por postularte, <span id="okName"></span>!</h3>
+      <p class="mb-6 leading-relaxed text-muted">Recibimos tus datos y tu CV. Nuestro equipo de Capital Humano los revisará y te contactará si tu perfil coincide con alguna vacante.</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button type="button" class="btn btn-primary" id="okVacantes">Ver otras vacantes</button>
+        <button type="button" class="btn btn-outline" id="okReset">Reiniciar formulario</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const $ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => el.querySelector<T>(s)!;
+  const $$ = <T extends HTMLElement = HTMLElement>(s: string, el: ParentNode = document) => [...el.querySelectorAll<T>(s)];
+
+  const form = $<HTMLFormElement>('#form');
+  const steps = $$('.step', form);
+  const lis = $$('#stepper .stepper li');
+  const wrap = $('#applyForm');
+  const TOTAL = steps.length;
+  // El último paso (Tu perfil y CV) se recorre de a una pantalla: pregunta 1, 2, 3 y después el CV
+  const subs = $$('.sub', steps[TOTAL - 1]);
+  const subLis = $$('#substepper li');
+  let cur = 1;
+  let sub = 0;
+  // Clic en una pregunta ya respondida (con check) para volver a ella
+  $('#substepper').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-go]');
+    if (b && +b.dataset.go! < sub) show(cur, +b.dataset.go!);
+  });
+
+  function show(n: number, s = 0) {
+    cur = n;
+    sub = s;
+    steps.forEach((el) => el.classList.toggle('active', +el.dataset.step! === n));
+    subs.forEach((el, i) => el.classList.toggle('active', i === sub));
+    subLis.forEach((li, i) => { li.classList.toggle('active', i === sub); li.classList.toggle('done', i < sub); });
+    lis.forEach((li, i) => { li.classList.toggle('active', i + 1 === n); li.classList.toggle('done', i + 1 < n); });
+    $('#stepLabel').textContent = lis[n - 1].querySelector('.l')!.textContent;
+    $('#back').hidden = n === 1;
+    $('#nextStep').textContent = isLastScreen() ? 'Enviar' : 'Siguiente';
+  }
+  const isLastScreen = () => cur === TOTAL && sub === subs.length - 1;
+
+  // Solo hace scroll si el stepper quedó tapado arriba (debajo del header); si ya se ve, no mueve la página
+  function keepStepperInView() {
+    const header = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+    const top = $('#stepper').getBoundingClientRect().top;
+    if (top < header) scrollTo({ top: scrollY + top - header - 16, behavior: 'smooth' });
+  }
+  const setErr = (el: Element, bad: boolean) => { el.classList.toggle('error', bad); return !bad; };
+
+  function validate(n: number) {
+    // En el último paso solo se valida la pantalla visible
+    const s = n === TOTAL ? subs[sub] : steps[n - 1];
+    let ok = true;
+    $$('.field', s).forEach((f) => {
+      const inp = f.querySelector<HTMLInputElement>('input:not([type=file]):not(.sr-only), select[required]');
+      if (!inp || !inp.required) return;
+      let bad = !inp.value.trim() || !inp.checkValidity();
+      if (inp.type === 'tel') bad = inp.value.replace(/\D/g, '').length < 6;
+      ok = setErr(f, bad) && ok;
+    });
+    $$('.q', s).forEach((q) => { ok = setErr(q, !q.querySelector(`input[name=${q.dataset.name}]:checked`)) && ok; });
+    if (s.contains(cv)) {
+      const f = cv.files?.[0];
+      $('#cvErr').textContent = 'Adjuntá tu CV.';
+      let bad = !f;
+      if (f && !isPdf(f)) { bad = true; $('#cvErr').textContent = 'El CV tiene que estar en PDF.'; }
+      else if (f && f.size > 5 * 1024 * 1024) { bad = true; $('#cvErr').textContent = 'El archivo supera los 5 MB.'; }
+      ok = setErr($('#cvField'), bad) && ok;
+    }
+    if (!ok) s.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return ok;
+  }
+
+  $('#nextStep').onclick = () => {
+    if (!validate(cur)) return;
+    if (cur === TOTAL && !isLastScreen()) { show(cur, sub + 1); return; }
+    if (cur < TOTAL) { show(cur + 1); keepStepperInView(); return; }
+    // Envío: acá va el fetch al backend con new FormData(form)
+    $('#okName').textContent = $<HTMLInputElement>('#nombre').value.trim().split(' ')[0];
+    form.hidden = true;
+    $('#stepper').hidden = true;
+    $('#form-title').hidden = true;
+    $('[data-lead]').hidden = true;
+    $('#success').hidden = false;
+    const bolt = document.getElementById('okBolt')!; bolt.classList.remove('play'); void bolt.getBoundingClientRect(); bolt.classList.add('play');
+    $('#formulario').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  $('#back').onclick = () => {
+    if (cur === TOTAL && sub > 0) show(cur, sub - 1);
+    else if (cur > 1) show(cur - 1, cur - 1 === TOTAL ? subs.length - 1 : 0);
+  };
+  form.addEventListener('input', (e) => (e.target as HTMLElement).closest('.field, .q')?.classList.remove('error'));
+  form.addEventListener('change', (e) => {
+    const t = e.target as HTMLElement;
+    t.closest('.field, .q')?.classList.remove('error');
+    if (t instanceof HTMLSelectElement) paintSelect(t);
+  });
+
+  // Selects: gris solo mientras muestran el placeholder; las opciones siempre en color normal
+  const selects = $$<HTMLSelectElement>('select.select', form);
+  function paintSelect(s: HTMLSelectElement) { s.classList.toggle('is-empty', !s.value); }
+  selects.forEach(paintSelect);
+
+  function resetForm() {
+    form.reset(); clearFile(); resetArea();
+    selects.forEach(paintSelect);
+    $$('.error', form).forEach((el) => el.classList.remove('error'));
+    form.hidden = false;
+    [$('#stepper'), $('#form-title'), $('[data-lead]')].forEach((el) => (el.hidden = false));
+    $('#success').hidden = true;
+    document.getElementById('okBolt')!.classList.remove('play');
+    show(1);
+  }
+
+  /* ---- Mensaje final ---- */
+  $('#okVacantes').onclick = () => { resetForm(); $('#vacantes').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  $('#okReset').onclick = () => { resetForm(); $('#formulario').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
+  /* ---- Desplegable de áreas ---- */
+  const areaBtn = $<HTMLButtonElement>('#areaBtn');
+  const areaList = $('#areaList');
+  const areaInput = $<HTMLInputElement>('#area');
+  const opts = $$('li', areaList);
+  const TAG = '<span class="dd-tag">Vacante abierta</span>';
+  let hi = -1;
+
+  function highlight(k: number) {
+    hi = k;
+    opts.forEach((o, j) => o.classList.toggle('hl', j === k));
+    if (opts[k]) { opts[k].scrollIntoView({ block: 'nearest' }); areaList.setAttribute('aria-activedescendant', opts[k].id); }
+  }
+  function openDD() {
+    areaList.hidden = false;
+    areaBtn.setAttribute('aria-expanded', 'true');
+    highlight(Math.max(0, opts.findIndex((o) => o.dataset.value === areaInput.value)));
+    areaList.focus({ preventScroll: true });
+  }
+  function closeDD(focus = true) {
+    areaList.hidden = true;
+    areaBtn.setAttribute('aria-expanded', 'false');
+    if (focus) areaBtn.focus({ preventScroll: true });
+  }
+  function setArea(a: string) {
+    const o = opts.find((x) => x.dataset.value === a);
+    if (!o) return;
+    areaInput.value = a;
+    opts.forEach((x) => x.setAttribute('aria-selected', String(x === o)));
+    const v = $('.dd-val', areaBtn);
+    v.className = 'dd-val';
+    v.innerHTML = `<span></span>${o.hasAttribute('data-open') ? TAG : ''}`;
+    v.firstElementChild!.textContent = a;
+    $('#areaField').classList.remove('error');
+  }
+  function resetArea() {
+    areaInput.value = '';
+    opts.forEach((o) => o.setAttribute('aria-selected', 'false'));
+    const v = $('.dd-val', areaBtn);
+    v.className = 'dd-val is-empty';
+    v.textContent = 'Seleccioná un área';
+  }
+  areaBtn.addEventListener('click', () => (areaList.hidden ? openDD() : closeDD()));
+  areaBtn.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openDD(); } });
+  areaList.addEventListener('click', (e) => {
+    const o = (e.target as HTMLElement).closest('li');
+    if (o) { setArea(o.dataset.value!); closeDD(); }
+  });
+  areaList.addEventListener('mousemove', (e) => {
+    const o = (e.target as HTMLElement).closest('li');
+    if (o) highlight(opts.indexOf(o));
+  });
+  areaList.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); highlight(Math.min(opts.length - 1, hi + 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(Math.max(0, hi - 1)); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setArea(opts[hi].dataset.value!); closeDD(); }
+    else if (e.key === 'Escape' || e.key === 'Tab') closeDD(e.key === 'Escape');
+  });
+  document.addEventListener('click', (e) => {
+    if (!areaList.hidden && !(e.target as HTMLElement).closest('#areaDD')) closeDD(false);
+  });
+
+  /* ---- Viene del popup "Postularme a esta vacante" ---- */
+  window.addEventListener('vacante:postular', (e) => {
+    const v = (e as CustomEvent<{ area: string }>).detail;
+    if (!$('#success').hidden) resetForm();
+    show(1);
+    setArea(v.area);
+    $('#formulario').scrollIntoView({ behavior: 'smooth' });
+    const f = $('#areaField');
+    f.classList.remove('flash'); void f.offsetWidth; f.classList.add('flash');
+    setTimeout(() => $('#nextStep').focus({ preventScroll: true }), 600);
+  });
+
+  /* ---- CV: subir / arrastrar ---- */
+  const cv = $<HTMLInputElement>('#cv');
+  const drop = $('#drop');
+  function renderFile() {
+    const f = cv.files?.[0];
+    $('#fileInfo').toggleAttribute('data-show', !!f);
+    if (f) {
+      $('#fileName').textContent = `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`;
+      $('#cvField').classList.remove('error');
+    }
+  }
+  function clearFile() { cv.value = ''; renderFile(); }
+  function isPdf(f: File) { return f.type === 'application/pdf' || /\.pdf$/i.test(f.name); }
+  cv.addEventListener('change', renderFile);
+  $('#fileRemove').onclick = clearFile;
+  (['dragenter', 'dragover'] as const).forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+  (['dragleave', 'drop'] as const).forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', (e) => {
+    const files = (e as DragEvent).dataTransfer?.files;
+    if (files?.length) { cv.files = files; renderFile(); }
+  });
+</script>

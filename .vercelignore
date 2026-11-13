@@ -1,0 +1,6 @@
+node_modules
+dist
+.astro
+/sumate-al-equipo.html
+/assets
+.env*

@@ -1,0 +1,155 @@
+---
+import { VACANTES } from '../data/vacantes';
+const pin = '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/>';
+const brief = '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M8 7v13M16 7v13"/>';
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const sortEs = (a: string, b: string) => a.localeCompare(b, 'es');
+// Solo las ciudades y áreas que tienen vacantes publicadas
+const ciudades = [...new Set(VACANTES.map((v) => v.ciudad))].sort(sortEs);
+const areas = [...new Set(VACANTES.map((v) => v.area))].sort(sortEs);
+const arrow = (d: string) => `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${d}"/></svg>`;
+---
+<section class="container-x scroll-mt-30 pb-24 md:pb-40" id="vacantes" aria-labelledby="jobs-title">
+  <div class="mb-10 flex flex-col gap-5 border-b border-line-strong pb-6 lg:flex-row lg:items-center lg:justify-between">
+    <h2 id="jobs-title" class="flex items-center gap-[18px] text-[clamp(28px,3vw,36px)] font-bold tracking-tight text-black">
+      Vacancias abiertas
+      <span id="jobCount" class="inline-grid h-8 min-w-8 place-items-center rounded-full bg-[#EFEFEF] px-2 text-xs font-bold text-text">{VACANTES.length}</span>
+    </h2>
+
+    <!-- Buscador y filtros -->
+    <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto] lg:w-[700px]" role="search">
+      <label class="relative">
+        <span class="sr-only">Buscar vacante</span>
+        <svg class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-placeholder" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+        <input id="jobSearch" type="search" class="input pl-10" placeholder="Buscar vacante" autocomplete="off" />
+      </label>
+      <select id="jobCity" class="select is-empty sm:w-[200px]" aria-label="Filtrar por ciudad">
+        <option value="">Todas las ciudades</option>
+        {ciudades.map((c) => <option value={c}>{c}</option>)}
+      </select>
+      <select id="jobArea" class="select is-empty sm:w-[200px]" aria-label="Filtrar por área">
+        <option value="">Todas las áreas</option>
+        {areas.map((a) => <option value={a}>{a}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <!-- Grilla: 6 por página (3 × 2 en desktop) -->
+  <div id="jobGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {VACANTES.map((v) => (
+      <article
+        class="job flex flex-col rounded-[20px] border border-line-strong bg-white p-6 transition-[box-shadow,border-color] hover:border-transparent hover:shadow-[0_14px_32px_rgba(0,0,0,.08)]"
+        data-area={v.area}
+        data-ciudad={v.ciudad}
+        data-text={norm(`${v.titulo} ${v.area} ${v.ciudad} ${v.resumen} ${v.tipo}`)}
+      >
+        <div class="mb-[18px] flex items-center justify-between">
+          <span class="inline-flex items-center gap-2 rounded-full bg-[#EFEFEF] px-3 py-1.5 text-[13px] font-semibold">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={brief} />{v.area}
+          </span>
+          <span class="text-[13px] font-semibold">{v.tipo}</span>
+        </div>
+        <h3 class="mb-3 text-[22px] font-bold tracking-tight text-ink">{v.titulo}</h3>
+        <p class="mb-5 flex-1 text-[15px] leading-[1.55] text-muted">{v.resumen}</p>
+        <div class="flex items-center justify-between">
+          <span class="inline-flex items-center gap-1.5 text-sm text-muted">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={pin} />{v.ciudad}
+          </span>
+          <button class="btn btn-primary px-4 py-[9px] text-sm" data-job={v.id}>Ver vacante</button>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div id="jobEmpty" hidden class="rounded-[20px] border border-dashed border-line-strong px-6 py-14 text-center">
+    <p class="mb-1 text-lg font-bold text-ink">No encontramos vacantes con esos filtros</p>
+    <p class="mb-5 text-muted">Probá con otra búsqueda o dejanos tu postulación espontánea en el formulario.</p>
+    <button id="jobClear" type="button" class="btn btn-outline">Limpiar filtros</button>
+  </div>
+
+  <!-- Paginado -->
+  <nav id="jobPager" class="mt-10 flex items-center justify-center gap-2" aria-label="Páginas de vacantes">
+    <button id="prev" class="pager-arrow" aria-label="Página anterior" set:html={arrow('m15 18-6-6 6-6')} />
+    <div id="pages" class="flex items-center gap-2"></div>
+    <button id="next" class="pager-arrow" aria-label="Página siguiente" set:html={arrow('m9 18 6-6-6-6')} />
+  </nav>
+</section>
+
+<script>
+  const PER_PAGE = 6;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const cards = [...document.querySelectorAll<HTMLElement>('#jobGrid .job')];
+  const search = $<HTMLInputElement>('#jobSearch');
+  const city = $<HTMLSelectElement>('#jobCity');
+  const area = $<HTMLSelectElement>('#jobArea');
+  const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const sortEs = (a: string, b: string) => a.localeCompare(b, 'es');
+  let page = 1;
+
+  const matches = (c: HTMLElement, f: { q: string; city: string; area: string }) =>
+    (!f.q || c.dataset.text!.includes(f.q)) && (!f.city || c.dataset.ciudad === f.city) && (!f.area || c.dataset.area === f.area);
+
+  // Cada filtro muestra solo las opciones que tienen vacantes, según la búsqueda y el otro filtro
+  function fillSelect(sel: HTMLSelectElement, values: string[], allLabel: string) {
+    const current = sel.value;
+    sel.innerHTML = `<option value="">${allLabel}</option>` + values.map((v) => `<option value="${v}">${v}</option>`).join('');
+    sel.value = values.includes(current) ? current : '';
+    sel.classList.toggle('is-empty', !sel.value);
+  }
+  function refreshOptions() {
+    const q = norm(search.value);
+    const cities = new Set<string>(), areas = new Set<string>();
+    cards.forEach((c) => {
+      if (matches(c, { q, city: '', area: area.value })) cities.add(c.dataset.ciudad!);
+      if (matches(c, { q, city: city.value, area: '' })) areas.add(c.dataset.area!);
+    });
+    fillSelect(city, [...cities].sort(sortEs), 'Todas las ciudades');
+    fillSelect(area, [...areas].sort(sortEs), 'Todas las áreas');
+  }
+
+  function render(scroll = false) {
+    const f = { q: norm(search.value), city: city.value, area: area.value };
+    const visible = cards.filter((c) => matches(c, f));
+    const pages = Math.max(1, Math.ceil(visible.length / PER_PAGE));
+    page = Math.min(page, pages);
+    const from = (page - 1) * PER_PAGE;
+    cards.forEach((c) => (c.hidden = true));
+    visible.slice(from, from + PER_PAGE).forEach((c) => (c.hidden = false));
+
+    $('#jobCount').textContent = String(visible.length);
+    $('#jobEmpty').hidden = visible.length > 0;
+    $('#jobGrid').hidden = visible.length === 0;
+    $('#jobPager').hidden = pages <= 1;
+    $<HTMLButtonElement>('#prev').disabled = page === 1;
+    $<HTMLButtonElement>('#next').disabled = page === pages;
+    $('#pages').innerHTML = Array.from({ length: pages }, (_, i) =>
+      `<button type="button" class="pager-num" data-page="${i + 1}"${i + 1 === page ? ' aria-current="page"' : ''}>${i + 1}</button>`).join('');
+
+    if (scroll) {
+      const header = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+      const top = $('#vacantes').getBoundingClientRect().top;
+      if (top < header) scrollTo({ top: scrollY + top - header - 16, behavior: 'smooth' });
+    }
+  }
+
+  const onFilter = () => { page = 1; refreshOptions(); render(); };
+  search.addEventListener('input', onFilter);
+  city.addEventListener('change', onFilter);
+  area.addEventListener('change', onFilter);
+  $('#jobClear').addEventListener('click', () => { search.value = ''; city.value = ''; area.value = ''; onFilter(); });
+  $('#prev').addEventListener('click', () => { page--; render(true); });
+  $('#next').addEventListener('click', () => { page++; render(true); });
+  $('#pages').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-page]');
+    if (b) { page = +b.dataset.page!; render(true); }
+  });
+
+  // Abrir popup
+  $('#jobGrid').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('[data-job]');
+    if (b) window.dispatchEvent(new CustomEvent('vacante:abrir', { detail: b.dataset.job }));
+  });
+
+  refreshOptions();
+  render();
+</script>
