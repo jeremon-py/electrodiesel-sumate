@@ -34,4 +34,4 @@ El arco rojo es un SVG fijo en el código.
 
 ## Deploy
 
-Cada push a `main` publica en GitHub Pages mediante `.github/workflows/deploy.yml`.
+Publicado en Vercel: https://electrodiesel-sumate.vercel.app — para actualizar: `npx vercel --prod`.
